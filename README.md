@@ -1,184 +1,36 @@
-# repoHack
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Instant repository security scanning focused on detecting malicious patterns commonly found in recruiter-shared TypeScript/JavaScript projects.
+## Getting Started
 
-## Overview
-
-repoHack is a monolithic Next.js (14+) app that clones a public Git repository, analyzes it with AST-based scanners, and returns a structured JSON report within seconds. The MVP is stateless, has no database, and is deployable to Vercel.
-
-## Features (MVP)
-
-- Paste a `.git` URL and run a full scan
-- Threat categories: code execution, process control, file system, network, environment, dependencies
-- Structured JSON results with file locations, lines, and snippets
-- Minimalist dark UI with adaptive JSON rendering
-
-## Requirements
-
-- Node.js: v20+ (LTS recommended)
-- pnpm: v8+
-- OS: macOS, Linux, or Windows (WSL2 recommended on Windows)
-
-## Quickstart
+First, run the development server:
 
 ```bash
-pnpm install
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
-Visit http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Scripts
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```bash
-# Start dev server
-pnpm dev
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-# Build for production
-pnpm build
+## Learn More
 
-# Start production build locally
-pnpm start
+To learn more about Next.js, take a look at the following resources:
 
-# Lint and format checks
-pnpm lint
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-# Run unit tests with coverage
-pnpm test --coverage
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Environment Variables
+## Deploy on Vercel
 
-These are read at build/runtime as applicable. For local development, use a `.env.local` file if needed.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-- `NODE_ENV` (default: `development`)
-- `MAX_REPO_SIZE` (default: `104857600` → 100MB)
-- `NPM_REGISTRY` (optional; defaults to public registry)
-- `LOG_LEVEL` (optional: `error|warn|info|debug`)
-
-## Development Notes
-
-- Architecture: Single Next.js app with server actions coordinating scanners
-- Git operations: performed server-side (e.g., via `simple-git`) into a temp directory
-- AST parsing: TypeScript/JS files parsed once where possible; scanners consume AST
-- Cleanup: all temp files/directories are removed post-scan
-
-## Canonical Scanning Strategy
-
-To maximize speed and meet the 15s target:
-
-- Parallelize scanner execution (code-execution, process-control, file-system, network, environment, dependencies)
-- Filter files early (prioritize TS/JS; skip binaries/large files)
-- Cache/reuse AST per file when multiple scanners need it
-- Early terminate on critical findings where safe to do so
-
-Note: Any prior references to sequential scanning are superseded by this canonical parallel strategy.
-
-## JSON Result Contract (High Level)
-
-The UI renders results adaptively from a stable JSON shape. A full schema file will be added; until then the types below guide integration.
-
-```ts
-// High-level types for scan results
-export type Severity = 'CRITICAL' | 'WARNING' | 'INFO'
-
-export interface ThreatResult {
-  category: string
-  subcategory: string
-  severity: Severity
-  description: string
-  file: string
-  line?: number
-  code?: string
-  details?: Record<string, unknown>
-}
-
-export interface ScanResult {
-  summary: {
-    overallStatus: 'SAFE' | 'WARNING' | 'UNSAFE'
-    countsBySeverity: { CRITICAL: number; WARNING: number; INFO: number }
-  }
-  results: Record<string, { // category
-    subcategories: Record<string, ThreatResult[]>
-  }>
-}
-```
-
-Example result (truncated):
-
-```json
-{
-  "summary": {
-    "overallStatus": "WARNING",
-    "countsBySeverity": { "CRITICAL": 1, "WARNING": 3, "INFO": 0 }
-  },
-  "results": {
-    "code_execution": {
-      "subcategories": {
-        "eval": [
-          {
-            "category": "code_execution",
-            "subcategory": "eval",
-            "severity": "CRITICAL",
-            "description": "eval() usage",
-            "file": "src/util.ts",
-            "line": 42,
-            "code": "eval(userInput)"
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-## Testing
-
-- Test Runner: Vitest; UI tests via React Testing Library
-- Targets (from docs): 80% for `lib/**` and `lib/actions/**`, 70% for `components/**`
-- Run locally and in CI via `pnpm test --coverage`
-- Use mocks for filesystem, git, network; no side-effects in unit tests
-
-## CI Expectations
-
-CI should run:
-
-1. `pnpm install --frozen-lockfile`
-2. `pnpm lint`
-3. `pnpm test --coverage` (fail on thresholds per docs)
-
-A minimal GitHub Actions workflow can be added in `.github/workflows/ci.yml` to enforce this.
-
-## Performance Budgets
-
-- Repo size: ≤ 100MB (configurable via `MAX_REPO_SIZE`)
-- Scan time target: ≤ 15s typical
-- Memory target: ≤ 512MB per scan
-
-## Project Structure (expected)
-
-```
-repohack/
-├── app/
-├── components/
-├── lib/
-│   ├── actions/
-│   ├── scanners/
-│   ├── git/
-│   ├── types/
-│   └── utils/
-├── public/
-├── docs/
-└── ...
-```
-
-## Deployment
-
-- Platform: Vercel (recommended)
-- Ensure environment variables are configured
-- Build command: `pnpm build`
-- Start command (self-host): `pnpm start`
-
-## License
-
-Open source; see repository license terms when added.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

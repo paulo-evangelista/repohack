@@ -16,7 +16,7 @@
 3. Basic project structure includes app/, components/, lib/, and utils/ directories
 4. Package.json includes necessary dependencies for development
 5. Git repository is initialized with proper .gitignore
-6. Project can be run locally with `npm run dev`
+6. Project can be run locally with `pnpm run dev`
 7. Basic health-check route at `/api/health` returns status information
 
 ### Story 1.2: Repository Cloning Infrastructure
