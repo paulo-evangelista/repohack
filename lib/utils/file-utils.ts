@@ -1,6 +1,5 @@
-import { promises as fs, constants } from 'fs';
+import { promises as fs } from 'fs';
 import { join, resolve, relative } from 'path';
-import { Stats } from 'fs';
 
 export interface FileMetadata {
   path: string;
@@ -27,17 +26,7 @@ export interface TraversalResult {
   totalSize: number;
 }
 
-/**
- * Safely checks if a file exists and is accessible
- */
-async function safeFileExists(path: string): Promise<boolean> {
-  try {
-    await fs.access(path, constants.R_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
+
 
 /**
  * Gets file metadata safely with error handling
@@ -100,9 +89,6 @@ export async function traverseDirectory(
 ): Promise<TraversalResult> {
   const {
     maxDepth = 10,
-    includeHidden = false,
-    fileExtensions = [],
-    maxFileSize,
     followSymlinks = false
   } = options;
 

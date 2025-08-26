@@ -1,15 +1,12 @@
-import { FileMetadata, TraversalOptions, TraversalResult, traverseDirectory } from '../utils/file-utils';
+import { FileMetadata, TraversalOptions, traverseDirectory } from '../utils/file-utils';
 import { 
   identifyFileType, 
   filterFilesByType, 
-  getCodeFiles, 
-  getDependencyFiles,
   getFileStatistics 
 } from '../utils/file-type-utils';
 import { 
   readFileWithMemoryMonitoring, 
-  MemoryMonitor,
-  ProcessingOptions 
+  MemoryMonitor
 } from '../utils/file-processing';
 
 export interface FileSystemThreat {
@@ -17,7 +14,7 @@ export interface FileSystemThreat {
   severity: 'low' | 'medium' | 'high' | 'critical';
   filePath: string;
   description: string;
-  details: Record<string, any>;
+  details: Record<string, string | number | boolean | Date>;
   timestamp: Date;
 }
 
@@ -258,7 +255,7 @@ async function analyzeSpecificFileTypes(
         fileSize: file.size,
         category: 'performance',
         fileType: fileType.category,
-        language: fileType.language
+        language: fileType.language || 'unknown'
       },
       timestamp: new Date()
     };
@@ -273,7 +270,7 @@ async function analyzeSpecificFileTypes(
       filePath: file.relativePath,
       description: 'Script file detected',
       details: {
-        language: fileType.language,
+        language: fileType.language || 'unknown',
         category: 'security',
         fileSize: file.size
       },

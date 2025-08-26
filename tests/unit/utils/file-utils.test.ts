@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { promises as fs, constants } from 'fs';
-import { join, resolve } from 'path';
+import { promises as fs } from 'fs';
 import { 
   traverseDirectory, 
   readFileContent, 

@@ -211,6 +211,22 @@ Add file system access monitoring and environment variable access detection to c
 6. AST parsing performance is optimized for large files
 7. System can identify function calls, variable declarations, and expressions
 
+#### Story 2.1.5: Linting and Code Quality Cleanup
+
+**As a developer,**
+**I want all linting issues to be resolved and code quality standards maintained,**
+**so that the codebase meets our quality standards and future development can proceed smoothly.**
+
+**Acceptance Criteria:**
+1. All ESLint errors are resolved (currently 31 errors)
+2. All ESLint warnings are addressed (currently 12 warnings)
+3. TypeScript strict mode compliance is maintained
+4. No `@typescript-eslint/no-explicit-any` violations remain
+5. All unused imports and variables are removed
+6. Code follows established TypeScript and ESLint rules
+7. All tests continue to pass after linting fixes
+8. Linting configuration is properly maintained for future development
+
 #### Story 2.2: Eval Function Detection
 
 **As a developer,**

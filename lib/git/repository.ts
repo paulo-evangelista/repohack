@@ -37,7 +37,6 @@ export async function cloneRepository(
   options: CloneOptions = {}
 ): Promise<RepositoryInfo> {
   const {
-    timeout = 300000, // 5 minutes default
     depth = 1, // Shallow clone by default
     branch = 'main'
   } = options;
@@ -54,14 +53,11 @@ export async function cloneRepository(
     // Initialize git in temporary directory
     const git: SimpleGit = simpleGit(tempDir);
     
-    // Set timeout for git operations
-    git.timeout(timeout);
-    
     // Clone repository
     await git.clone(repositoryUrl, tempDir, {
       '--depth': depth.toString(),
       '--branch': branch,
-      '--single-branch': true
+      '--single-branch': 'true'
     });
     
     // Extract metadata

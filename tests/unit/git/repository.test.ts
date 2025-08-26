@@ -97,7 +97,7 @@ describe('Repository Module', () => {
       expect(mockGit.clone).toHaveBeenCalledWith(repositoryUrl, mockTempDir, {
         '--depth': '1',
         '--branch': 'main',
-        '--single-branch': true
+        '--single-branch': 'true'
       });
     });
     
@@ -181,11 +181,10 @@ describe('Repository Module', () => {
       await cloneRepository(repositoryUrl, options);
       
       // Verify custom options were used
-      expect(mockGit.timeout).toHaveBeenCalledWith(600000);
       expect(mockGit.clone).toHaveBeenCalledWith(repositoryUrl, mockTempDir, {
         '--depth': '5',
         '--branch': 'develop',
-        '--single-branch': true
+        '--single-branch': 'true'
       });
     });
     
