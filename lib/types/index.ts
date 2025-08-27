@@ -32,3 +32,22 @@ export interface ParseResult {
   error?: string;
   filePath: string;
 }
+
+// Threat detection types
+export interface ThreatResult {
+  category: string;
+  subcategory: string;
+  severity: 'CRITICAL' | 'WARNING' | 'INFO';
+  description: string;
+  file: string;
+  line?: number;
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
+export interface ThreatScanner {
+  name: string;
+  category: string;
+  subcategory: string;
+  scan(files: RepositoryFile[]): Promise<ThreatResult[]>;
+}
