@@ -257,21 +257,6 @@ Add file system access monitoring and environment variable access detection to c
 6. Threat severity is set to WARNING level
 7. System handles various Function constructor usage patterns
 
-#### Story 2.4: Dynamic Code Execution Detection
-
-**As a developer,**
-**I want the system to detect other dynamic code execution patterns,**
-**so that I can identify comprehensive code execution threats.**
-
-**Acceptance Criteria:**
-1. System detects setTimeout/setInterval with code strings
-2. Identifies dynamic import() calls with variable paths
-3. Captures require() calls with dynamic module names
-4. Results are properly categorized and subcategorized
-5. All detected threats follow the established JSON structure
-6. System provides clear descriptions of each threat type
-7. Performance impact of scanning is minimal and within time constraints
-
 ### Epic 3: User Interface & Experience
 
 **Expanded Goal**: Build the complete web interface with minimalist dark theme design using Tailwind CSS, including the scan input form and adaptive results display that dynamically renders the JSON structure. This epic creates the user-facing experience that makes the security scanning tool accessible and intuitive for developers.

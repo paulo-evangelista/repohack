@@ -1,102 +1,131 @@
-import Image from "next/image";
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Container } from '../components/ui/Container';
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="border-b border-border bg-card">
+        <Container>
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">R</span>
+              </div>
+              <h1 className="text-xl font-bold">RepoHack</h1>
+            </div>
+            <nav className="hidden md:flex items-center space-x-6">
+              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                Documentation
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                About
+              </a>
+            </nav>
+          </div>
+        </Container>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+      {/* Main Content */}
+      <main className="flex-1">
+        <Container className="py-12">
+          <div className="max-w-2xl mx-auto text-center space-y-8">
+            {/* Hero Section */}
+            <div className="space-y-4">
+              <h2 className="text-4xl font-bold tracking-tight">
+                Security Scanner for Code Repositories
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Advanced threat detection using AST parsing and code analysis to identify security vulnerabilities in your codebase.
+              </p>
+            </div>
+
+            {/* Repository Input Section */}
+            <div className="space-y-6">
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <h3 className="text-lg font-semibold">Scan Repository</h3>
+                <p className="text-muted-foreground text-sm">
+                  Enter a GitHub repository URL to begin security analysis
+                </p>
+                
+                <div className="space-y-4">
+                  <Input
+                    type="url"
+                    placeholder="https://github.com/username/repository"
+                    label="Repository URL"
+                    className="text-center"
+                  />
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button size="lg" className="flex-1 sm:flex-none">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      Scan Repository
+                    </Button>
+                    <Button variant="outline" size="lg" className="flex-1 sm:flex-none">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Learn More
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features Section */}
+              <div className="grid md:grid-cols-3 gap-6 pt-8">
+                <div className="text-center space-y-3">
+                  <div className="mx-auto h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <svg className="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold">AST Parsing</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Advanced code analysis using Abstract Syntax Trees
+                  </p>
+                </div>
+
+                <div className="text-center space-y-3">
+                  <div className="mx-auto h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <svg className="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold">Threat Detection</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Identify security vulnerabilities and code execution risks
+                  </p>
+                </div>
+
+                <div className="text-center space-y-3">
+                  <div className="mx-auto h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <svg className="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold">Fast & Secure</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Efficient scanning with comprehensive security coverage
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Container>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-card mt-16">
+        <Container>
+          <div className="py-8 text-center text-muted-foreground">
+            <p className="text-sm">
+              Built with Next.js and Tailwind CSS • Security-focused code analysis
+            </p>
+          </div>
+        </Container>
       </footer>
     </div>
   );

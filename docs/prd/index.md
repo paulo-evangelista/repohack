@@ -17,7 +17,6 @@
       - [Story 2.1: AST-Based Code Parsing](./epic-details.md#story-21-ast-based-code-parsing)
       - [Story 2.2: Eval Function Detection](./epic-details.md#story-22-eval-function-detection)
       - [Story 2.3: Function Constructor Detection](./epic-details.md#story-23-function-constructor-detection)
-      - [Story 2.4: Dynamic Code Execution Detection](./epic-details.md#story-24-dynamic-code-execution-detection)
     - [Epic 3: User Interface & Experience](./epic-details.md#epic-3-user-interface-experience)
       - [Story 3.1: Dark Theme Foundation and Layout](./epic-details.md#story-31-dark-theme-foundation-and-layout)
       - [Story 3.2: Repository Input Form](./epic-details.md#story-32-repository-input-form)
