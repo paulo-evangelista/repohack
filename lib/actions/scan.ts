@@ -1,3 +1,5 @@
+'use server';
+
 import { cloneRepository, RepositoryInfo } from '../git/repository';
 
 export interface ScanOptions {
@@ -7,7 +9,19 @@ export interface ScanOptions {
 }
 
 export interface ScanResult {
-  repository: RepositoryInfo;
+  repository: {
+    path: string;
+    metadata: {
+      name: string;
+      owner: string;
+      url: string;
+      size: number;
+      fileCount: number;
+      commitHash: string;
+      branch: string;
+      cloneTime: Date;
+    };
+  };
   scanCompleted: boolean;
   errors: string[];
 }
@@ -33,7 +47,10 @@ export async function scanRepository(
     });
     
     return {
-      repository,
+      repository: {
+        path: repository.path,
+        metadata: repository.metadata
+      },
       scanCompleted: true,
       errors: []
     };
@@ -55,8 +72,7 @@ export async function scanRepository(
           commitHash: 'unknown',
           branch: 'unknown',
           cloneTime: new Date()
-        },
-        cleanup: async () => {}
+        }
       },
       scanCompleted: false,
       errors

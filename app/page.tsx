@@ -1,6 +1,5 @@
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 import { Container } from '../components/ui/Container';
+import { RepositoryInput } from '../components/RepositoryInput';
 
 export default function Home() {
   return (
@@ -43,36 +42,7 @@ export default function Home() {
 
             {/* Repository Input Section */}
             <div className="space-y-6">
-              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-                <h3 className="text-lg font-semibold">Scan Repository</h3>
-                <p className="text-muted-foreground text-sm">
-                  Enter a GitHub repository URL to begin security analysis
-                </p>
-                
-                <div className="space-y-4">
-                  <Input
-                    type="url"
-                    placeholder="https://github.com/username/repository"
-                    label="Repository URL"
-                    className="text-center"
-                  />
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button size="lg" className="flex-1 sm:flex-none">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      Scan Repository
-                    </Button>
-                    <Button variant="outline" size="lg" className="flex-1 sm:flex-none">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Learn More
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <RepositoryInput />
 
               {/* Features Section */}
               <div className="grid md:grid-cols-3 gap-6 pt-8">
