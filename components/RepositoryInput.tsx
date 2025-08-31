@@ -9,6 +9,8 @@ import type { ScanResult } from '../lib/actions/scan';
 
 interface RepositoryInputProps {
   onSubmit?: (result: ScanResult) => void;
+  onScanStart?: () => void;
+  onScanComplete?: (result: ScanResult) => void;
   className?: string;
 }
 
@@ -20,6 +22,8 @@ interface FormState {
 
 const RepositoryInput: React.FC<RepositoryInputProps> = ({ 
   onSubmit, 
+  onScanStart,
+  onScanComplete,
   className = '' 
 }) => {
   const [formState, setFormState] = useState<FormState>({
@@ -80,6 +84,11 @@ const RepositoryInput: React.FC<RepositoryInputProps> = ({
     // Set loading state
     setFormState(prev => ({ ...prev, isLoading: true, error: '' }));
 
+    // Call onScanStart callback if provided
+    if (onScanStart) {
+      onScanStart();
+    }
+
     try {
       // Call scan server action
       const result = await scanRepository(formState.url);
@@ -87,6 +96,11 @@ const RepositoryInput: React.FC<RepositoryInputProps> = ({
       // Call onSubmit callback if provided
       if (onSubmit) {
         onSubmit(result);
+      }
+
+      // Call onScanComplete callback if provided
+      if (onScanComplete) {
+        onScanComplete(result);
       }
 
       // Reset form on success

@@ -1,6 +1,7 @@
 'use server';
 
 import { cloneRepository, RepositoryInfo } from '../git/repository';
+import { ThreatResult } from '../types';
 
 export interface ScanOptions {
   timeout?: number;
@@ -24,6 +25,8 @@ export interface ScanResult {
   };
   scanCompleted: boolean;
   errors: string[];
+  threats?: ThreatResult[];
+  overallStatus: 'SAFE' | 'UNSAFE' | 'WARNING';
 }
 
 /**
@@ -52,7 +55,9 @@ export async function scanRepository(
         metadata: repository.metadata
       },
       scanCompleted: true,
-      errors: []
+      errors: [],
+      threats: [],
+      overallStatus: 'SAFE'
     };
     
   } catch (error) {
@@ -75,7 +80,9 @@ export async function scanRepository(
         }
       },
       scanCompleted: false,
-      errors
+      errors,
+      threats: [],
+      overallStatus: 'UNSAFE'
     };
   }
 }

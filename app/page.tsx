@@ -1,7 +1,25 @@
+'use client';
+
+import { useState } from 'react';
 import { Container } from '../components/ui/Container';
 import { RepositoryInput } from '../components/RepositoryInput';
+import { ScanResults } from '../components/ScanResults';
+import { ScanResult } from '../lib/types';
 
 export default function Home() {
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleScanComplete = (result: ScanResult) => {
+    setScanResult(result);
+    setIsScanning(false);
+  };
+
+  const handleScanStart = () => {
+    setIsScanning(true);
+    setScanResult(null);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -42,7 +60,18 @@ export default function Home() {
 
             {/* Repository Input Section */}
             <div className="space-y-6">
-              <RepositoryInput />
+              <RepositoryInput 
+                onScanStart={handleScanStart}
+                onScanComplete={handleScanComplete}
+              />
+
+              {/* Scan Results */}
+              {(isScanning || scanResult) && (
+                <ScanResults 
+                  scanResult={scanResult}
+                  isLoading={isScanning}
+                />
+              )}
 
               {/* Features Section */}
               <div className="grid md:grid-cols-3 gap-6 pt-8">

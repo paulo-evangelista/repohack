@@ -45,6 +45,26 @@ export interface ThreatResult {
   details?: Record<string, unknown>;
 }
 
+export interface ScanResult {
+  repository: {
+    path: string;
+    metadata: {
+      name: string;
+      owner: string;
+      url: string;
+      size: number;
+      fileCount: number;
+      commitHash: string;
+      branch: string;
+      cloneTime: Date;
+    };
+  };
+  scanCompleted: boolean;
+  errors: string[];
+  threats?: ThreatResult[];
+  overallStatus: 'SAFE' | 'UNSAFE' | 'WARNING';
+}
+
 export interface ThreatScanner {
   name: string;
   category: string;

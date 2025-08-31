@@ -57,7 +57,6 @@ export async function cloneRepository(
     await git.clone(repositoryUrl, tempDir, {
       '--depth': depth.toString(),
       '--branch': branch,
-      '--single-branch': 'true'
     });
     
     // Extract metadata
@@ -97,7 +96,7 @@ export async function cloneRepository(
       }
     }
     
-    throw new Error('Failed to clone repository. Please check the URL and try again.');
+    throw new Error(error instanceof Error ? error.message : 'Failed to clone repository. Please check the URL and try again.');
   }
 }
 
