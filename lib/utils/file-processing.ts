@@ -33,6 +33,7 @@ export function getMemoryUsage(): MemoryInfo {
   const used = memUsage.heapUsed;
   const total = memUsage.heapTotal;
   const percentage = (used / total) * 100;
+  console.log(`getMemoryUsage called: ${percentage}%`);
   
   return {
     used,

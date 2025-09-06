@@ -1,6 +1,7 @@
 'use server';
 
-import { cloneRepository, RepositoryInfo } from '../git/repository';
+import { cloneRepository } from '../git/repository';
+import { scanFileSystem } from '../scanners/file-system';
 import { ThreatResult } from '../types';
 
 export interface ScanOptions {
@@ -48,6 +49,8 @@ export async function scanRepository(
       depth: options.depth,
       branch: options.branch
     });
+
+    const scanResult = await scanFileSystem(repository.path, {maxFileSize: 1024 * 1024 * 1024});
     
     return {
       repository: {

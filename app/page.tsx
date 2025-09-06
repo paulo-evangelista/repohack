@@ -5,6 +5,7 @@ import { Container } from '../components/ui/Container';
 import { RepositoryInput } from '../components/RepositoryInput';
 import { ScanResults } from '../components/ScanResults';
 import { ScanResult } from '../lib/types';
+import { GithubIcon } from 'lucide-react';
 
 export default function Home() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -33,11 +34,8 @@ export default function Home() {
               <h1 className="text-xl font-bold">RepoHack</h1>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                Documentation
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                About
+              <a href="https://github.com/paulo-evangelista/repohack" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <GithubIcon color='white' size={24} />
               </a>
             </nav>
           </div>

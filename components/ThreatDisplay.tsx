@@ -1,15 +1,50 @@
 'use client';
 
 import React from 'react';
-import { ThreatResult } from '../lib/types';
+import { ThreatResult, GenericThreat } from '../lib/types';
+import { DynamicThreatDisplay } from './DynamicThreatDisplay';
 import { FileText, MapPin, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 interface ThreatDisplayProps {
-  threat: ThreatResult;
+  threat: ThreatResult | GenericThreat;
   className?: string;
+  useDynamicRendering?: boolean;
+  showAllFields?: boolean;
 }
 
-const ThreatDisplay: React.FC<ThreatDisplayProps> = ({ threat, className = '' }) => {
+const ThreatDisplay: React.FC<ThreatDisplayProps> = ({ 
+  threat, 
+  className = '', 
+  useDynamicRendering = false,
+  showAllFields = false 
+}) => {
+  // Use dynamic rendering if enabled
+  if (useDynamicRendering) {
+    return (
+      <DynamicThreatDisplay 
+        threat={threat as GenericThreat} 
+        className={className}
+        showAllFields={showAllFields}
+      />
+    );
+  }
+  // Type guard to check if threat is a ThreatResult
+  const isThreatResult = (threat: ThreatResult | GenericThreat): threat is ThreatResult => {
+    return 'category' in threat && 'subcategory' in threat && 'severity' in threat && 'description' in threat && 'file' in threat;
+  };
+
+  // Convert GenericThreat to ThreatResult for backward compatibility
+  const threatResult: ThreatResult = isThreatResult(threat) ? threat : {
+    category: (threat as GenericThreat).category || 'Unknown',
+    subcategory: (threat as GenericThreat).subcategory || 'General',
+    severity: (threat as GenericThreat).severity as 'CRITICAL' | 'WARNING' | 'INFO' || 'INFO',
+    description: (threat as GenericThreat).description || 'No description available',
+    file: (threat as GenericThreat).file || 'Unknown file',
+    line: (threat as GenericThreat).line,
+    code: (threat as GenericThreat).code,
+    details: (threat as GenericThreat).details
+  };
+
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'CRITICAL':
@@ -54,19 +89,19 @@ const ThreatDisplay: React.FC<ThreatDisplayProps> = ({ threat, className = '' })
       {/* Header with severity and location */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
-          {getSeverityIcon(threat.severity)}
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(threat.severity)}`}>
-            {threat.severity}
+          {getSeverityIcon(threatResult.severity)}
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(threatResult.severity)}`}>
+            {threatResult.severity}
           </span>
         </div>
         
         <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
           <FileText className="h-4 w-4" />
-          <span className="font-mono">{threat.file}</span>
-          {threat.line && (
+          <span className="font-mono">{threatResult.file}</span>
+          {threatResult.line && (
             <>
               <MapPin className="h-4 w-4" />
-              <span className="font-mono">Line {threat.line}</span>
+              <span className="font-mono">Line {threatResult.line}</span>
             </>
           )}
         </div>
@@ -75,40 +110,40 @@ const ThreatDisplay: React.FC<ThreatDisplayProps> = ({ threat, className = '' })
       {/* Threat description */}
       <div className="mb-3">
         <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-          {threat.category} - {threat.subcategory}
+          {threatResult.category} - {threatResult.subcategory}
         </h4>
         <p className="text-gray-700 dark:text-gray-300 text-sm">
-          {threat.description}
+          {threatResult.description}
         </p>
       </div>
 
       {/* Code snippet */}
-      {threat.code && (
-        <div className={`rounded-lg p-3 mb-3 ${getSeverityBgColor(threat.severity)}`}>
+      {threatResult.code && (
+        <div className={`rounded-lg p-3 mb-3 ${getSeverityBgColor(threatResult.severity)}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               Code Snippet
             </span>
-            {threat.line && (
+            {threatResult.line && (
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                Line {threat.line}
+                Line {threatResult.line}
               </span>
             )}
           </div>
           <pre className="text-sm font-mono text-gray-800 dark:text-gray-200 overflow-x-auto">
-            <code>{threat.code}</code>
+            <code>{threatResult.code}</code>
           </pre>
         </div>
       )}
 
       {/* Additional details */}
-      {threat.details && Object.keys(threat.details).length > 0 && (
+      {threatResult.details && Object.keys(threatResult.details).length > 0 && (
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
           <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Additional Details
           </h5>
           <div className="space-y-2">
-            {Object.entries(threat.details).map(([key, value]) => (
+            {Object.entries(threatResult.details).map(([key, value]) => (
               <div key={key} className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400 capitalize">
                   {key.replace(/([A-Z])/g, ' $1').trim()}:

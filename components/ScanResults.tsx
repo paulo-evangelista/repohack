@@ -1,18 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ScanResult, ThreatResult } from '../lib/types';
+import { ScanResult, ThreatResult, GenericScanResult } from '../lib/types';
 import { Button } from './ui/Button';
 import { Container } from './ui/Container';
+import { DynamicScanResults } from './DynamicScanResults';
 import { ChevronDown, ChevronRight, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 interface ScanResultsProps {
   scanResult: ScanResult | null;
   isLoading?: boolean;
+  useDynamicRendering?: boolean;
+  showAllFields?: boolean;
 }
 
-const ScanResults: React.FC<ScanResultsProps> = ({ scanResult, isLoading = false }) => {
+const ScanResults: React.FC<ScanResultsProps> = ({ 
+  scanResult, 
+  isLoading = false, 
+  useDynamicRendering = false,
+  showAllFields = false 
+}) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  // Use dynamic rendering if enabled
+  if (useDynamicRendering) {
+    return (
+      <DynamicScanResults 
+        scanResult={scanResult as GenericScanResult} 
+        isLoading={isLoading}
+        showAllFields={showAllFields}
+      />
+    );
+  }
 
   if (isLoading) {
     return (

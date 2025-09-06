@@ -33,7 +33,62 @@ export interface ParseResult {
   filePath: string;
 }
 
-// Threat detection types
+// Generic JSON structure types for dynamic rendering
+export interface GenericField {
+  key: string;
+  value: unknown;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null' | 'undefined';
+}
+
+export interface GenericThreat {
+  [key: string]: unknown;
+  // Common fields that might exist
+  category?: string;
+  subcategory?: string;
+  severity?: string;
+  description?: string;
+  file?: string;
+  line?: number;
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
+export interface GenericCategory {
+  [key: string]: unknown;
+  // Common fields that might exist
+  name?: string;
+  title?: string;
+  label?: string;
+  threats?: GenericThreat[];
+  subcategories?: Record<string, GenericCategory>;
+  count?: number;
+}
+
+export interface GenericScanResult {
+  repository?: {
+    path?: string;
+    metadata?: {
+      name?: string;
+      owner?: string;
+      url?: string;
+      size?: number;
+      fileCount?: number;
+      commitHash?: string;
+      branch?: string;
+      cloneTime?: Date;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  scanCompleted?: boolean;
+  errors?: string[];
+  threats?: GenericThreat[];
+  categories?: Record<string, GenericCategory>;
+  overallStatus?: string;
+  [key: string]: unknown;
+}
+
+// Legacy threat detection types (for backward compatibility)
 export interface ThreatResult {
   category: string;
   subcategory: string;

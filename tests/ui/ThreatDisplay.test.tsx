@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThreatDisplay } from '../../components/ThreatDisplay';
-import { ThreatResult } from '../../lib/types';
+import { ThreatResult, GenericThreat } from '../../lib/types';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -296,6 +296,56 @@ describe('ThreatDisplay', () => {
       render(<ThreatDisplay threat={threatWithSpecialChars} />);
       
       expect(screen.getByText('src/components/User-Input.tsx')).toBeInTheDocument();
+    });
+  });
+
+  describe('Dynamic Rendering', () => {
+    const mockGenericThreat: GenericThreat = {
+      category: 'Code Execution',
+      subcategory: 'Eval Function',
+      severity: 'CRITICAL',
+      description: 'Dangerous eval function detected',
+      file: 'src/main.js',
+      line: 42,
+      code: 'eval(userInput)',
+      details: {
+        risk: 'high',
+        recommendation: 'Use JSON.parse instead'
+      },
+      customField: 'custom value',
+      numericField: 123
+    };
+
+    it('uses dynamic rendering when useDynamicRendering is true', () => {
+      render(<ThreatDisplay threat={mockGenericThreat} useDynamicRendering={true} />);
+      
+      expect(screen.getByText('Code Execution - Eval Function')).toBeInTheDocument();
+      expect(screen.getByText('Dangerous eval function detected')).toBeInTheDocument();
+    });
+
+    it('uses legacy rendering when useDynamicRendering is false', () => {
+      render(<ThreatDisplay threat={mockThreat} useDynamicRendering={false} />);
+      
+      expect(screen.getByText('Code Execution - Eval Function')).toBeInTheDocument();
+      expect(screen.getByText('Dangerous eval function detected that could execute arbitrary code')).toBeInTheDocument();
+    });
+
+    it('handles GenericThreat with missing common fields in legacy mode', () => {
+      const minimalGenericThreat: GenericThreat = {
+        customField: 'custom value'
+      };
+      
+      render(<ThreatDisplay threat={minimalGenericThreat} useDynamicRendering={false} />);
+      
+      expect(screen.getByText('Unknown - General')).toBeInTheDocument();
+      expect(screen.getByText('No description available')).toBeInTheDocument();
+      expect(screen.getByText('Unknown file')).toBeInTheDocument();
+    });
+
+    it('passes showAllFields prop to dynamic component', () => {
+      render(<ThreatDisplay threat={mockGenericThreat} useDynamicRendering={true} showAllFields={true} />);
+      
+      expect(screen.getByText('Code Execution - Eval Function')).toBeInTheDocument();
     });
   });
 });

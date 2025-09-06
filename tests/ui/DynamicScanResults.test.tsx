@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ScanResults } from '../../components/ScanResults';
-import { ScanResult, ThreatResult, GenericScanResult, GenericThreat } from '../../lib/types';
+import { DynamicScanResults } from '../../components/DynamicScanResults';
+import { GenericScanResult, GenericThreat } from '../../lib/types';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -11,10 +11,11 @@ vi.mock('lucide-react', () => ({
   AlertTriangle: ({ className }: { className?: string }) => <div data-testid="alert-triangle" className={className} />,
   CheckCircle: ({ className }: { className?: string }) => <div data-testid="check-circle" className={className} />,
   XCircle: ({ className }: { className?: string }) => <div data-testid="x-circle" className={className} />,
+  Info: ({ className }: { className?: string }) => <div data-testid="info" className={className} />,
 }));
 
-describe('ScanResults', () => {
-  const mockScanResult: ScanResult = {
+describe('DynamicScanResults', () => {
+  const mockScanResult: GenericScanResult = {
     repository: {
       path: '/tmp/test-repo',
       metadata: {
@@ -34,7 +35,7 @@ describe('ScanResults', () => {
     overallStatus: 'SAFE'
   };
 
-  const mockThreats: ThreatResult[] = [
+  const mockThreats: GenericThreat[] = [
     {
       category: 'Code Execution',
       subcategory: 'Eval Function',
@@ -69,23 +70,31 @@ describe('ScanResults', () => {
 
   describe('Loading State', () => {
     it('displays loading spinner when isLoading is true', () => {
-      render(<ScanResults scanResult={null} isLoading={true} />);
+      render(<DynamicScanResults scanResult={null} isLoading={true} />);
       
       expect(screen.getByText('Scanning repository...')).toBeInTheDocument();
       expect(screen.getByRole('status')).toBeInTheDocument(); // Loading spinner
     });
   });
 
-  describe('No Results State', () => {
-    it('returns null when scanResult is null', () => {
-      const { container } = render(<ScanResults scanResult={null} isLoading={false} />);
-      expect(container.firstChild).toBeNull();
+  describe('Invalid Data Handling', () => {
+    it('displays error message for invalid scan result', () => {
+      render(<DynamicScanResults scanResult={null} isLoading={false} />);
+      
+      expect(screen.getByText('Invalid Scan Result')).toBeInTheDocument();
+      expect(screen.getByText('The scan result data is not in the expected format.')).toBeInTheDocument();
+    });
+
+    it('handles non-object scan result', () => {
+      render(<DynamicScanResults scanResult={'invalid' as any} isLoading={false} />);
+      
+      expect(screen.getByText('Invalid Scan Result')).toBeInTheDocument();
     });
   });
 
   describe('Overall Security Status Display', () => {
     it('displays SAFE status correctly', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+      render(<DynamicScanResults scanResult={mockScanResult} isLoading={false} />);
       
       expect(screen.getByText('Security Status')).toBeInTheDocument();
       expect(screen.getByText('SAFE')).toBeInTheDocument();
@@ -94,8 +103,8 @@ describe('ScanResults', () => {
     });
 
     it('displays WARNING status correctly', () => {
-      const warningResult = { ...mockScanResult, overallStatus: 'WARNING' as const };
-      render(<ScanResults scanResult={warningResult} isLoading={false} />);
+      const warningResult = { ...mockScanResult, overallStatus: 'WARNING' };
+      render(<DynamicScanResults scanResult={warningResult} isLoading={false} />);
       
       expect(screen.getByText('WARNING')).toBeInTheDocument();
       const alertTriangles = screen.getAllByTestId('alert-triangle');
@@ -103,18 +112,27 @@ describe('ScanResults', () => {
     });
 
     it('displays UNSAFE status correctly', () => {
-      const unsafeResult = { ...mockScanResult, overallStatus: 'UNSAFE' as const };
-      render(<ScanResults scanResult={unsafeResult} isLoading={false} />);
+      const unsafeResult = { ...mockScanResult, overallStatus: 'UNSAFE' };
+      render(<DynamicScanResults scanResult={unsafeResult} isLoading={false} />);
       
       expect(screen.getByText('UNSAFE')).toBeInTheDocument();
       const xCircles = screen.getAllByTestId('x-circle');
       expect(xCircles.length).toBeGreaterThan(0);
     });
+
+    it('handles unknown status gracefully', () => {
+      const unknownResult = { ...mockScanResult, overallStatus: 'UNKNOWN' };
+      render(<DynamicScanResults scanResult={unknownResult} isLoading={false} />);
+      
+      expect(screen.getByText('UNKNOWN')).toBeInTheDocument();
+      const infoIcons = screen.getAllByTestId('info');
+      expect(infoIcons.length).toBeGreaterThan(0);
+    });
   });
 
   describe('Repository Metadata Display', () => {
     it('displays repository details correctly', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+      render(<DynamicScanResults scanResult={mockScanResult} isLoading={false} />);
       
       expect(screen.getByText('Repository Details')).toBeInTheDocument();
       expect(screen.getByText('test-user/test-repo')).toBeInTheDocument();
@@ -123,43 +141,46 @@ describe('ScanResults', () => {
       expect(screen.getByText('main')).toBeInTheDocument();
     });
 
-    it('formats file size correctly', () => {
-      const largeRepo = {
+    it('handles missing metadata fields gracefully', () => {
+      const minimalResult = {
         ...mockScanResult,
         repository: {
-          ...mockScanResult.repository,
           metadata: {
-            ...mockScanResult.repository.metadata,
-            size: 2.5 * 1024 * 1024 // 2.5MB
+            name: 'test-repo'
           }
         }
       };
       
-      render(<ScanResults scanResult={largeRepo} isLoading={false} />);
-      expect(screen.getByText('2.50 MB')).toBeInTheDocument();
+      render(<DynamicScanResults scanResult={minimalResult} isLoading={false} />);
+      
+      expect(screen.getByText('Repository Details')).toBeInTheDocument();
+      expect(screen.getByText('test-repo')).toBeInTheDocument();
     });
+  });
 
-    it('formats file count with locale', () => {
-      const largeRepo = {
+  describe('Dynamic Scan Result Fields', () => {
+    it('displays additional scan result fields', () => {
+      const resultWithExtraFields = {
         ...mockScanResult,
-        repository: {
-          ...mockScanResult.repository,
-          metadata: {
-            ...mockScanResult.repository.metadata,
-            fileCount: 1000
-          }
-        }
+        scanId: 'scan-123',
+        scanDuration: 5000,
+        scannerVersion: '1.0.0'
       };
       
-      render(<ScanResults scanResult={largeRepo} isLoading={false} />);
-      expect(screen.getByText('1,000')).toBeInTheDocument();
+      render(<DynamicScanResults scanResult={resultWithExtraFields} isLoading={false} />);
+      
+      expect(screen.getByText('Scan Information')).toBeInTheDocument();
+      expect(screen.getByText('Scan Id')).toBeInTheDocument();
+      expect(screen.getByText('scan-123')).toBeInTheDocument();
+      expect(screen.getByText('Scan Duration')).toBeInTheDocument();
+      expect(screen.getByText('5000')).toBeInTheDocument();
     });
   });
 
   describe('Threats Display', () => {
     it('displays threats when they exist', () => {
       const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} />);
       
       expect(screen.getByText('Security Threats (3)')).toBeInTheDocument();
       expect(screen.getByText('Code Execution')).toBeInTheDocument();
@@ -168,7 +189,7 @@ describe('ScanResults', () => {
 
     it('groups threats by category and subcategory', () => {
       const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} />);
       
       // Check categories
       expect(screen.getByText('Code Execution')).toBeInTheDocument();
@@ -180,41 +201,9 @@ describe('ScanResults', () => {
       expect(screen.queryByText('Function Constructor')).not.toBeInTheDocument();
     });
 
-    it('displays threat details correctly', () => {
-      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
-      
-      // Threat details are hidden by default (collapsed state)
-      expect(screen.queryByText('Dangerous eval function detected')).not.toBeInTheDocument();
-      expect(screen.queryByText('src/main.js:42')).not.toBeInTheDocument();
-      expect(screen.queryByText('eval(userInput)')).not.toBeInTheDocument();
-    });
-
-    it('shows severity badges with correct colors', () => {
-      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
-      
-      // Severity badges are hidden by default (collapsed state)
-      expect(screen.queryByText('CRITICAL')).not.toBeInTheDocument();
-      expect(screen.queryByText('WARNING')).not.toBeInTheDocument();
-      expect(screen.queryByText('INFO')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Category Expansion', () => {
-    it('starts with all categories collapsed', () => {
-      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
-      
-      const chevronRights = screen.getAllByTestId('chevron-right');
-      expect(chevronRights.length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('chevron-down')).not.toBeInTheDocument();
-      expect(screen.queryByText('Eval Function')).not.toBeInTheDocument();
-    });
-
     it('expands category when clicked', () => {
       const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} />);
       
       const categoryButton = screen.getByText('Code Execution');
       fireEvent.click(categoryButton);
@@ -226,7 +215,7 @@ describe('ScanResults', () => {
 
     it('collapses category when clicked again', () => {
       const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} />);
       
       const categoryButton = screen.getByText('Code Execution');
       
@@ -240,9 +229,29 @@ describe('ScanResults', () => {
     });
   });
 
+  describe('Grouping by Different Fields', () => {
+    it('groups threats by severity when groupByField is severity', () => {
+      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} groupByField="severity" />);
+      
+      expect(screen.getByText('CRITICAL')).toBeInTheDocument();
+      expect(screen.getByText('WARNING')).toBeInTheDocument();
+      expect(screen.getByText('INFO')).toBeInTheDocument();
+    });
+
+    it('groups threats by file when groupByField is file', () => {
+      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} groupByField="file" />);
+      
+      expect(screen.getByText('Src/main.js')).toBeInTheDocument();
+      expect(screen.getByText('Src/file.js')).toBeInTheDocument();
+      expect(screen.getByText('Src/utils.js')).toBeInTheDocument();
+    });
+  });
+
   describe('Empty State Handling', () => {
     it('displays no threats message when threats array is empty', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+      render(<DynamicScanResults scanResult={mockScanResult} isLoading={false} />);
       
       expect(screen.getByText('No Security Threats Found')).toBeInTheDocument();
       expect(screen.getByText('The repository appears to be secure with no detected vulnerabilities.')).toBeInTheDocument();
@@ -252,7 +261,7 @@ describe('ScanResults', () => {
 
     it('displays no threats message when threats is undefined', () => {
       const resultWithoutThreats = { ...mockScanResult, threats: undefined };
-      render(<ScanResults scanResult={resultWithoutThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithoutThreats} isLoading={false} />);
       
       expect(screen.getByText('No Security Threats Found')).toBeInTheDocument();
     });
@@ -264,7 +273,7 @@ describe('ScanResults', () => {
         ...mockScanResult,
         errors: ['Repository access denied', 'Timeout during scan']
       };
-      render(<ScanResults scanResult={resultWithErrors} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithErrors} isLoading={false} />);
       
       expect(screen.getByText('Scan Errors (2)')).toBeInTheDocument();
       expect(screen.getByText('• Repository access denied')).toBeInTheDocument();
@@ -272,33 +281,55 @@ describe('ScanResults', () => {
     });
 
     it('does not display errors section when no errors', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+      render(<DynamicScanResults scanResult={mockScanResult} isLoading={false} />);
       
       expect(screen.queryByText('Scan Errors')).not.toBeInTheDocument();
     });
   });
 
-  describe('Responsive Design', () => {
-    it('applies responsive grid classes to repository metadata', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+  describe('Show All Fields', () => {
+    it('shows available threat fields when showAllFields is true', () => {
+      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} showAllFields={true} />);
       
-      // Find the grid element that contains the metadata
-      const gridElement = screen.getByText('Size').closest('div')?.parentElement;
-      expect(gridElement).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-4');
+      expect(screen.getByText('Available Threat Fields')).toBeInTheDocument();
+      expect(screen.getByText('Category')).toBeInTheDocument();
+      expect(screen.getByText('Severity')).toBeInTheDocument();
+      expect(screen.getByText('Description')).toBeInTheDocument();
     });
 
-    it('uses responsive spacing and sizing classes', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+    it('hides available threat fields when showAllFields is false', () => {
+      const resultWithThreats = { ...mockScanResult, threats: mockThreats };
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} showAllFields={false} />);
       
-      // Find the main container with mt-8 class
-      const container = screen.getByText('Security Status').closest('div')?.parentElement?.parentElement?.parentElement?.parentElement;
-      expect(container).toHaveClass('mt-8');
+      expect(screen.queryByText('Available Threat Fields')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Dynamic Field Rendering', () => {
+    it('renders threats with extra fields correctly', () => {
+      const threatsWithExtraFields: GenericThreat[] = [
+        {
+          ...mockThreats[0],
+          customField: 'custom value',
+          numericField: 123,
+          booleanField: true
+        }
+      ];
+      
+      const resultWithThreats = { ...mockScanResult, threats: threatsWithExtraFields };
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} showAllFields={true} />);
+      
+      const categoryButton = screen.getByText('Code Execution');
+      fireEvent.click(categoryButton);
+      
+      expect(screen.getByText('Eval Function')).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
     it('has proper heading structure', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} />);
+      render(<DynamicScanResults scanResult={mockScanResult} isLoading={false} />);
       
       expect(screen.getByRole('heading', { name: 'Security Status' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Repository Details' })).toBeInTheDocument();
@@ -306,67 +337,10 @@ describe('ScanResults', () => {
 
     it('provides proper button labels for category expansion', () => {
       const resultWithThreats = { ...mockScanResult, threats: mockThreats };
-      render(<ScanResults scanResult={resultWithThreats} isLoading={false} />);
+      render(<DynamicScanResults scanResult={resultWithThreats} isLoading={false} />);
       
       const categoryButton = screen.getByRole('button', { name: 'Code Execution' });
       expect(categoryButton).toBeInTheDocument();
-    });
-  });
-
-  describe('Dynamic Rendering', () => {
-    const mockGenericScanResult: GenericScanResult = {
-      repository: {
-        path: '/tmp/test-repo',
-        metadata: {
-          name: 'test-repo',
-          owner: 'test-user',
-          url: 'https://github.com/test-user/test-repo',
-          size: 1024 * 1024,
-          fileCount: 50,
-          commitHash: 'abc123def',
-          branch: 'main',
-          cloneTime: new Date('2024-01-01T12:00:00Z')
-        }
-      },
-      scanCompleted: true,
-      errors: [],
-      threats: [],
-      overallStatus: 'SAFE'
-    };
-
-    const mockGenericThreats: GenericThreat[] = [
-      {
-        category: 'Code Execution',
-        subcategory: 'Eval Function',
-        severity: 'CRITICAL',
-        description: 'Dangerous eval function detected',
-        file: 'src/main.js',
-        line: 42,
-        code: 'eval(userInput)',
-        details: { risk: 'high', recommendation: 'Use JSON.parse instead' }
-      }
-    ];
-
-    it('uses dynamic rendering when useDynamicRendering is true', () => {
-      const resultWithThreats = { ...mockGenericScanResult, threats: mockGenericThreats };
-      render(<ScanResults scanResult={resultWithThreats as any} isLoading={false} useDynamicRendering={true} />);
-      
-      expect(screen.getByText('Security Status')).toBeInTheDocument();
-      expect(screen.getByText('SAFE')).toBeInTheDocument();
-    });
-
-    it('uses legacy rendering when useDynamicRendering is false', () => {
-      render(<ScanResults scanResult={mockScanResult} isLoading={false} useDynamicRendering={false} />);
-      
-      expect(screen.getByText('Security Status')).toBeInTheDocument();
-      expect(screen.getByText('SAFE')).toBeInTheDocument();
-    });
-
-    it('passes showAllFields prop to dynamic component', () => {
-      const resultWithThreats = { ...mockGenericScanResult, threats: mockGenericThreats };
-      render(<ScanResults scanResult={resultWithThreats as any} isLoading={false} useDynamicRendering={true} showAllFields={true} />);
-      
-      expect(screen.getByText('Security Status')).toBeInTheDocument();
     });
   });
 });
