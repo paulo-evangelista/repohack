@@ -5,14 +5,19 @@ export type {
   CloneOptions
 } from '../git/repository';
 
-// AST and file processing types
-export interface RepositoryFile {
+export interface RepositoryFileMetadata {
   path: string;
-  content: string;
+  relativePath: string;
   size: number;
+  modificationDate: Date;
+  isDirectory: boolean;
+  isSymbolicLink: boolean;
+  isFile: boolean;
   extension: string;
-  lastModified?: Date;
-  isBinary: boolean;
+}
+
+export interface RepositoryFile extends RepositoryFileMetadata {
+  content: string;
 }
 
 export interface ASTNode {
@@ -85,6 +90,8 @@ export interface GenericScanResult {
   threats?: GenericThreat[];
   categories?: Record<string, GenericCategory>;
   overallStatus?: string;
+  scanTime?: number;
+  scannedFiles?: number;
   [key: string]: unknown;
 }
 
@@ -118,6 +125,8 @@ export interface ScanResult {
   errors: string[];
   threats?: ThreatResult[];
   overallStatus: 'SAFE' | 'UNSAFE' | 'WARNING';
+  scanTime: number;
+  scannedFiles: number;
 }
 
 export interface ThreatScanner {

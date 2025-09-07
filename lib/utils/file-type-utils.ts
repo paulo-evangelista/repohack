@@ -1,4 +1,4 @@
-import { FileMetadata } from './file-utils';
+import { RepositoryFileMetadata } from '../types';
 
 export interface FileTypeInfo {
   category: 'code' | 'config' | 'binary' | 'document' | 'other';
@@ -191,9 +191,9 @@ export function identifyFileType(filePath: string): FileTypeInfo {
  * Filters files based on type and options
  */
 export function filterFilesByType(
-  files: FileMetadata[],
+  files: RepositoryFileMetadata[],
   options: FileFilterOptions = {}
-): FileMetadata[] {
+): RepositoryFileMetadata[] {
   const {
     includeCodeFiles = true,
     includeConfigFiles = true,
@@ -207,6 +207,9 @@ export function filterFilesByType(
   } = options;
   
   return files.filter(file => {
+
+    if (file.relativePath.split('/')[0] === '.git') return false;
+
     const fileType = identifyFileType(file.relativePath);
     
     // Apply specific file type filters first (these take precedence)
@@ -236,7 +239,7 @@ export function filterFilesByType(
 /**
  * Gets files by priority level
  */
-export function getFilesByPriority(files: FileMetadata[], priority: 'high' | 'medium' | 'low'): FileMetadata[] {
+export function getFilesByPriority(files: RepositoryFileMetadata[], priority: 'high' | 'medium' | 'low'): RepositoryFileMetadata[] {
   return files.filter(file => {
     const fileType = identifyFileType(file.relativePath);
     return fileType.priority === priority;
@@ -246,7 +249,7 @@ export function getFilesByPriority(files: FileMetadata[], priority: 'high' | 'me
 /**
  * Gets all code files from a file list
  */
-export function getCodeFiles(files: FileMetadata[]): FileMetadata[] {
+export function getCodeFiles(files: RepositoryFileMetadata[]): RepositoryFileMetadata[] {
   return files.filter(file => {
     const fileType = identifyFileType(file.relativePath);
     return fileType.category === 'code';
@@ -256,7 +259,7 @@ export function getCodeFiles(files: FileMetadata[]): FileMetadata[] {
 /**
  * Gets all dependency-related files
  */
-export function getDependencyFiles(files: FileMetadata[]): FileMetadata[] {
+export function getDependencyFiles(files: RepositoryFileMetadata[]): RepositoryFileMetadata[] {
   return files.filter(file => {
     const fileType = identifyFileType(file.relativePath);
     return fileType.isDependencyFile || fileType.isLockFile;
@@ -279,7 +282,7 @@ export function isLargeFile(fileSize: number, thresholds: { small: number; mediu
 /**
  * Gets file statistics summary
  */
-export function getFileStatistics(files: FileMetadata[]) {
+export function getFileStatistics(files: RepositoryFileMetadata[]) {
   const stats = {
     totalFiles: files.length,
     totalSize: files.reduce((sum, file) => sum + file.size, 0),

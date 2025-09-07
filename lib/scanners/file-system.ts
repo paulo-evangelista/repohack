@@ -1,4 +1,4 @@
-import { FileMetadata, TraversalOptions, traverseDirectory } from '../utils/file-utils';
+import { TraversalOptions, traverseDirectory } from '../utils/file-utils';
 import { 
   identifyFileType, 
   filterFilesByType, 
@@ -8,6 +8,7 @@ import {
   readFileWithMemoryMonitoring, 
   MemoryMonitor
 } from '../utils/file-processing';
+import { RepositoryFileMetadata } from '../types';
 
 export interface FileSystemThreat {
   type: 'file-system';
@@ -20,7 +21,7 @@ export interface FileSystemThreat {
 
 export interface FileSystemScanResult {
   threats: FileSystemThreat[];
-  files: FileMetadata[];
+  files: RepositoryFileMetadata[];
   statistics: ReturnType<typeof getFileStatistics>;
   processingTime: number;
   memoryUsage: {
@@ -180,7 +181,7 @@ export async function scanFileSystem(
  * Analyzes files for potential threats based on detection rules
  */
 async function analyzeFilesForThreats(
-  files: FileMetadata[],
+  files: RepositoryFileMetadata[],
   rules: ThreatDetectionRule[],
   result: FileSystemScanResult,
   memoryMonitor: MemoryMonitor
@@ -233,7 +234,7 @@ async function analyzeFilesForThreats(
  * Performs specific analysis for different file types
  */
 async function analyzeSpecificFileTypes(
-  file: FileMetadata,
+  file: RepositoryFileMetadata,
   result: FileSystemScanResult,
   memoryMonitor: MemoryMonitor
 ): Promise<void> {
@@ -284,7 +285,7 @@ async function analyzeSpecificFileTypes(
  * Analyzes dependency files for potential security issues
  */
 async function analyzeDependencyFile(
-  file: FileMetadata,
+  file: RepositoryFileMetadata,
   result: FileSystemScanResult,
   memoryMonitor: MemoryMonitor
 ): Promise<void> {

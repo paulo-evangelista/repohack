@@ -1,6 +1,7 @@
 import { createReadStream, promises as fs } from 'fs';
 import { Readable } from 'stream';
-import { FileMetadata } from './file-utils';
+import { RepositoryFileMetadata } from '../types';
+import { extname } from 'path';
 
 export interface ProcessingOptions {
   chunkSize?: number;
@@ -19,7 +20,7 @@ export interface MemoryInfo {
 
 export interface ProcessingResult {
   content: string | Buffer;
-  metadata: FileMetadata;
+  metadata: RepositoryFileMetadata;
   memoryUsage: MemoryInfo;
   processingTime: number;
   chunks: number;
@@ -269,10 +270,10 @@ export async function readFileWithMemoryMonitoring(
 /**
  * Gets file metadata for processing
  */
-async function getFileMetadata(filePath: string): Promise<FileMetadata> {
+async function getFileMetadata(filePath: string): Promise<RepositoryFileMetadata> {
   const stats = await fs.stat(filePath);
   const relativePath = filePath.split('/').pop() || filePath;
-  
+  const extension = extname(filePath);
   return {
     path: filePath,
     relativePath,
@@ -280,7 +281,8 @@ async function getFileMetadata(filePath: string): Promise<FileMetadata> {
     modificationDate: stats.mtime,
     isDirectory: stats.isDirectory(),
     isSymbolicLink: stats.isSymbolicLink(),
-    isFile: stats.isFile()
+    isFile: stats.isFile(),
+    extension
   };
 }
 

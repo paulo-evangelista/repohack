@@ -1,15 +1,6 @@
 import { promises as fs } from 'fs';
-import { join, resolve, relative } from 'path';
-
-export interface FileMetadata {
-  path: string;
-  relativePath: string;
-  size: number;
-  modificationDate: Date;
-  isDirectory: boolean;
-  isSymbolicLink: boolean;
-  isFile: boolean;
-}
+import { join, resolve, relative, extname } from 'path';
+import { RepositoryFileMetadata } from '../types';
 
 export interface TraversalOptions {
   maxDepth?: number;
@@ -20,8 +11,8 @@ export interface TraversalOptions {
 }
 
 export interface TraversalResult {
-  files: FileMetadata[];
-  directories: FileMetadata[];
+  files: RepositoryFileMetadata[];
+  directories: RepositoryFileMetadata[];
   errors: string[];
   totalSize: number;
 }
@@ -31,11 +22,11 @@ export interface TraversalResult {
 /**
  * Gets file metadata safely with error handling
  */
-async function getFileMetadata(filePath: string, basePath: string): Promise<FileMetadata | null> {
+export async function getFileMetadata(filePath: string, basePath: string): Promise<RepositoryFileMetadata | null> {
   try {
     const stats = await fs.stat(filePath);
     const relativePath = relative(basePath, filePath);
-    
+    const fileExtension = extname(filePath);
     return {
       path: filePath,
       relativePath,
@@ -43,7 +34,8 @@ async function getFileMetadata(filePath: string, basePath: string): Promise<File
       modificationDate: stats.mtime,
       isDirectory: stats.isDirectory(),
       isSymbolicLink: stats.isSymbolicLink(),
-      isFile: stats.isFile()
+      isFile: stats.isFile(),
+      extension: fileExtension
     };
   } catch (error) {
     console.warn(`Failed to get metadata for ${filePath}:`, error);
@@ -54,7 +46,7 @@ async function getFileMetadata(filePath: string, basePath: string): Promise<File
 /**
  * Checks if a file should be included based on traversal options
  */
-function shouldIncludeFile(file: FileMetadata, options: TraversalOptions): boolean {
+function shouldIncludeFile(file: RepositoryFileMetadata, options: TraversalOptions): boolean {
   // Skip hidden files unless explicitly included
   if (!options.includeHidden && file.relativePath.includes('/.')) {
     // Only skip if it's actually a hidden file (starts with .)

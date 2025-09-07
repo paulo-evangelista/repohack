@@ -1,5 +1,5 @@
 import { parseAST, getNodesByType } from '../utils/ast-parser';
-import type { RepositoryFile, ASTNode, ThreatResult } from '../types';
+import type { ASTNode, ThreatResult, RepositoryFile } from '../types';
 
 /**
  * Code Execution Scanner for detecting potentially dangerous code patterns
@@ -46,7 +46,8 @@ export class CodeExecutionScanner {
 
     for (const file of files) {
       // Skip non-code files and binary files
-      if (!supportedExtensions.includes(file.extension) || file.isBinary) {
+      if (!supportedExtensions.includes(file.extension)) {
+        console.warn(`Skipping non-code file ${file.path}`);
         continue;
       }
 

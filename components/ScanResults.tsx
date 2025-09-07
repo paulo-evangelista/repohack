@@ -145,7 +145,7 @@ const ScanResults: React.FC<ScanResultsProps> = ({
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Files</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total files</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {scanResult.repository.metadata.fileCount.toLocaleString()}
             </p>
@@ -163,6 +163,11 @@ const ScanResults: React.FC<ScanResultsProps> = ({
             </p>
           </div>
         </div>
+        <p className="pt-6">Scanned{" "}
+          <span className="font-bold">{scanResult.scannedFiles} valid files </span>
+          in{" "}
+          <span className="font-bold">{Math.ceil(scanResult.scanTime/1000)} seconds</span>
+        </p>
       </div>
 
       {/* Threats Display */}
